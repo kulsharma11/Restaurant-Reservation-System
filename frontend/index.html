@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant API</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --surface-color: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #8b5cf6;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --glow-color: rgba(59, 130, 246, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.15), transparent 25%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        p.subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .panel {
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 1s ease-out;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+        }
+
+        .panel-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section {
+            margin-bottom: 2.5rem;
+            background: rgba(15, 23, 42, 0.4);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #e2e8f0;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row>div {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        input,
+        select {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        input::placeholder {
+            color: rgba(148, 163, 184, 0.5);
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        button.secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .output-container {
+            height: calc(100vh - 12rem);
+            position: sticky;
+            top: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .output-box {
+            background: #000000;
+            border-radius: 12px;
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            color: #a78bfa;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .output-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0.75rem;
+        }
+
+        .output-table th,
+        .output-table td {
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+            font-size: 0.85rem;
+            color: #e2e8f0;
+        }
+
+        .output-table th {
+            background: rgba(148, 163, 184, 0.12);
+            color: #f8fafc;
+        }
+
+        .availability-card {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.55);
+        }
+
+        .availability-card h3 {
+            margin: 0 0 0.5rem;
+            font-size: 0.95rem;
+            color: #93c5fd;
+        }
+
+        .output-html p {
+            margin: 0 0 0.35rem;
+            color: #cbd5e1;
+        }
+
+
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-left: auto;
+        }
+
+        .status-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        .status-loading {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            display: none;
+        }
+
+        button.loading .loading-spinner {
+            display: inline-block;
+        }
+
+        button.loading span {
+            opacity: 0.7;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Restaurant Reservation System</h1>
+        <p class="subtitle">API Explorer & Management Dashboard</p>
+    </header>
+
+    <div class="container">
+        <!-- Input Panel -->
+        <div class="panel">
+            <h2 class="panel-header">🪄 Action Center</h2>
+
+            <!-- Tables Section -->
+            <div class="section">
+                <div class="section-title">
+                    <span>Tables Management</span>
+                    <button class="secondary" style="width: auto; padding: 0.4rem 1rem; font-size: 0.8rem;"
+                        onclick="listTables()" id="btn-list-tables">List All</button>
+                </div>
+
+                <div class="form-row">
+                    <div>
+                        <label>Table Number</label>
+                        <input type="number" id="tab-num" placeholder="e.g. 10" min="1">
+                    </div>
+                    <div>
+                        <label>Capacity</label>
+                        <input type="number" id="tab-cap" placeholder="e.g. 4" min="1" max="20">
+                    </div>
+                    <div>
+                        <label>Location</label>
+                        <select id="tab-loc">
+                            <option value="indoor">Indoor</option>
+                            <option value="outdoor">Outdoor</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="addTable()" id="btn-add-table">
+                    <div class="loading-spinner"></div>
+                    <span>Add New Table</span>
+                </button>
+            </div>
+
+            <!-- Availability Section -->
+            <div class="section">
+                <div class="section-title">Check Availability</div>
+                <div class="form-row">
+                    <div style="flex: 1.5;">
+                        <input type="date" id="avail-date">
+                    </div>
+                    <div style="flex: 1;">
+                        <select id="avail-time">
+                            <option value="">All times</option>
+                            <option value="18:00">18:00</option>
+                            <option value="20:00">20:00</option>
+                            <option value="22:00">22:00</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1;">
+                        <button onclick="checkAvailability()" id="btn-avail">
+                            <div class="loading-spinner"></div>
+                            <span>Check</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create Reservation Section -->
+            <div class="section">
+                <div class="section-title">Book Table</div>
+                <div class="form-row">
+                    <div>
+                        <label>Date</label>
+                        <input type="date" id="res-date">
+                    </div>
+                    <div>
+                        <label>Time Slot</label>
+                        <select id="res-time">
+                            <option value="18:00">18:00</option>
+                            <option value="20:00">20:00</option>
+                            <option value="22:00">22:00</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div>
+                        <label>Guests</label>
+                        <input type="number" id="res-guests" placeholder="2" min="1">
+                    </div>
+                    <div>
+                        <label>Table ID (Optional)</label>
+                        <input type="number" id="res-table-id" placeholder="Smart Assign if empty">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div>
+                        <label>Name</label>
+                        <input type="text" id="res-name" placeholder="John Doe">
+                    </div>
+                    <div>
+                        <label>Email</label>
+                        <input type="email" id="res-email" placeholder="john@example.com">
+                    </div>
+                </div>
+                <button onclick="createReservation()" id="btn-create-res">
+                    <div class="loading-spinner"></div>
+                    <span>Confirm Booking</span>
+                </button>
+            </div>
+
+            <!-- Manage Reservation Section -->
+            <div class="section">
+                <div class="section-title">Manage Reservation</div>
+                <div class="form-row">
+                    <div style="flex: 2;">
+                        <input type="number" id="manage-res-id" placeholder="Reservation ID">
+                    </div>
+                    <div style="flex: 1; display: flex; gap: 0.5rem;">
+                        <button class="secondary" onclick="getReservation()" id="btn-get-res">Get</button>
+                        <button onclick="cancelReservation()" id="btn-cancel-res"
+                            style="background: linear-gradient(135deg, #ef4444, #b91c1c);">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Output Panel -->
+        <div class="panel output-container">
+            <h2 class="panel-header">
+                📡 Server Response
+                <span id="status-indicator" class="status-badge" style="display: none;"></span>
+            </h2>
+            <div class="output-box">
+                <div id="output-json" class="output-html">
+                    <p>// Ready and waiting for requests...</p>
+                    <p>// Select an action from the left panel to begin.</p>
+                    <p>// Make sure uvicorn is running!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        // Pre-fill dates to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('avail-date').value = today;
+        document.getElementById('res-date').value = today;
+
+        function setStatus(type, message) {
+            const el = document.getElementById('status-indicator');
+            el.style.display = 'inline-block';
+            el.className = 'status-badge status-' + type;
+            el.innerText = message;
+        }
+
+        function escapeHTML(value) {
+            if (value === null || value === undefined) return '';
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function renderGenericTable(items) {
+            if (!items || !items.length) return '<p>No rows available.</p>';
+
+            const columns = [...new Set(items.flatMap(item => Object.keys(item)))];
+            let html = '<table class="output-table"><thead><tr>';
+            html += columns.map(col => `<th>${escapeHTML(col)}</th>`).join('');
+            html += '</tr></thead><tbody>';
+
+            items.forEach(item => {
+                html += '<tr>';
+                html += columns.map(col => {
+                    const value = item[col];
+                    if (Array.isArray(value)) {
+                        const nested = value.map(sub => '<pre style="margin:0">' + escapeHTML(JSON.stringify(sub, null, 2)) + '</pre>').join('');
+                        return `<td>${nested}</td>`;
+                    }
+                    if (typeof value === 'object' && value !== null) {
+                        return `<td><pre style="margin:0">${escapeHTML(JSON.stringify(value, null, 2))}</pre></td>`;
+                    }
+                    return `<td>${escapeHTML(value)}</td>`;
+                }).join('');
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            return html;
+        }
+
+        function renderAvailabilityTable(data) {
+            if (!Array.isArray(data) || !data.length) return '<p>No availability data found.</p>';
+
+            return data.map(entry => {
+                const info = `<div class="availability-card"><h3>${escapeHTML(entry.date)} @ ${escapeHTML(entry.time_slot)}</h3>`;
+                const tableHtml = renderGenericTable(entry.available_tables || []);
+                return info + tableHtml + '</div>';
+            }).join('');
+        }
+
+        function setOutput(data) {
+            const outputEl = document.getElementById('output-json');
+
+            if (Array.isArray(data)) {
+                if (data.length && data.every(item => item && item.available_tables !== undefined && item.date && item.time_slot)) {
+                    outputEl.innerHTML = renderAvailabilityTable(data);
+                    return;
+                }
+                outputEl.innerHTML = renderGenericTable(data);
+                return;
+            }
+
+            if (data && typeof data === 'object' && !Array.isArray(data)) {
+                if (data.available_tables && data.date && data.time_slot) {
+                    outputEl.innerHTML = renderAvailabilityTable([data]);
+                    return;
+                }
+                outputEl.innerHTML = renderGenericTable([data]);
+                return;
+            }
+
+            // fallback for primitives
+            outputEl.innerHTML = `<pre>${escapeHTML(JSON.stringify(data, null, 2))}</pre>`;
+        }
+
+        function setLoading(btnId, isLoading) {
+            const btn = document.getElementById(btnId);
+            if (isLoading) {
+                btn.classList.add('loading');
+                setStatus('loading', 'Fetching...');
+            } else {
+                btn.classList.remove('loading');
+            }
+        }
+
+        async function apiCall(endpoint, options, btnId) {
+            setLoading(btnId, true);
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    }
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    setStatus('success', `${response.status} OK`);
+                } else {
+                    setStatus('error', `${response.status} Error`);
+                }
+
+                setOutput(data);
+                return data;
+            } catch (error) {
+                setStatus('error', 'Network Error');
+                setOutput({ error: 'Failed to connect to the server. Is it running on port 8000?' });
+            } finally {
+                setLoading(btnId, false);
+            }
+        }
+
+        // --- API Action Functions ---
+
+        function listTables() {
+            apiCall('/tables/', { method: 'GET' }, 'btn-list-tables');
+        }
+
+        function addTable() {
+            const num = document.getElementById('tab-num').value;
+            const cap = document.getElementById('tab-cap').value;
+            const loc = document.getElementById('tab-loc').value;
+
+            if (!num || !cap) return alert("Table Number and Capacity are required.");
+
+            apiCall('/tables/', {
+                method: 'POST',
+                body: JSON.stringify({
+                    table_number: parseInt(num),
+                    capacity: parseInt(cap),
+                    location: loc
+                })
+            }, 'btn-add-table');
+        }
+
+        function checkAvailability() {
+            const date = document.getElementById('avail-date').value;
+            const time_slot = document.getElementById('avail-time').value;
+            if (!date) return alert("Date is required.");
+
+            let url = `/reservations/available?date=${date}`;
+            if (time_slot) {
+                url += `&time_slot=${encodeURIComponent(time_slot)}`;
+            }
+
+            apiCall(url, { method: 'GET' }, 'btn-avail');
+        }
+
+        function createReservation() {
+            const date = document.getElementById('res-date').value;
+            const time_slot = document.getElementById('res-time').value;
+            const guest_count = document.getElementById('res-guests').value;
+            const table_id = document.getElementById('res-table-id').value;
+            const name = document.getElementById('res-name').value;
+            const email = document.getElementById('res-email').value;
+
+            if (!date || !guest_count || !name || !email) {
+                return alert("Date, Guests, Name, and Email are required.");
+            }
+
+            const payload = {
+                date: date,
+                time_slot: time_slot,
+                guest_count: parseInt(guest_count),
+                customer: {
+                    name: name,
+                    email: email
+                }
+            };
+
+            if (table_id) {
+                payload.table_id = parseInt(table_id);
+            }
+
+            apiCall('/reservations/', {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            }, 'btn-create-res');
+        }
+
+        function getReservation() {
+            const id = document.getElementById('manage-res-id').value;
+            if (!id) return alert("Reservation ID is required.");
+
+            apiCall(`/reservations/${id}`, { method: 'GET' }, 'btn-get-res');
+        }
+
+        function cancelReservation() {
+            const id = document.getElementById('manage-res-id').value;
+            if (!id) return alert("Reservation ID is required.");
+
+            if (confirm("Are you sure you want to cancel this reservation?")) {
+                apiCall(`/reservations/${id}`, { method: 'DELETE' }, 'btn-cancel-res');
+            }
+        }
+    </script>
+</body>
+
+</html>
